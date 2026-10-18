@@ -1,0 +1,74 @@
+# Copy this file to configuration.yml and edit it (configuration.yml is git-ignored).
+
+# Kubernetes namespace whose pods will be dumped
+namespace: my-namespace
+
+# Exact service name. If set, no menu is shown (override with `-service <name>`).
+service: ""
+
+# Module: services <module>-* are listed for interactive choice
+# (override with `-module <name>`; glob like `my-*-api` also works).
+# Both service and module empty = the module name is asked interactively.
+module: my-module
+
+# Environment: name of a context from the standard ~/.kube/config.
+# Empty = current context. Override with `-env <name>`.
+env: "my-context"
+
+# Optional: container name for multi-container pods (empty = default container)
+container: ""
+
+# Path to a local jattach binary (https://github.com/jattach/jattach; a static linux build
+# matching the pod architecture). The dump is always taken through it: kube-dump streams the
+# binary into the pod over `kubectl exec -i` (to /tmp, removed afterwards), runs
+# `jattach 1 jcmd "Thread.print -l"` and the dump comes back through the exec stream, NOT
+# through the container stdout, so it never reaches Elastic or other log collectors.
+# Needs a writable /tmp in the container and the same user as the JVM (PID 1).
+# A relative path is resolved from the working directory.
+jattach: jattach
+
+# Directory inside the pod where the jattach binary is placed and where the JVM writes the
+# heap dump before it is copied out. Must be writable by the JVM user and large enough for
+# the heap. An absolute path of letters, digits and . _ - /
+remote_dir: /tmp
+
+# What to collect when the service is fixed (`service` below or `-service`; with the menu the
+# type is chosen interactively): thread | heap | both. Override with `-mode`.
+mode: thread
+
+# Only this pod of the service, when the service is fixed ("" = every pod; "*" = every pod,
+# stated explicitly).
+# A heap dump of several pods is never started implicitly: set a pod name or "*".
+# Override with `-pod`.
+pod: ""
+
+# Ask for confirmation before a heap dump (the JVM is paused while it is written, and the file
+# may contain secrets and personal data). `-yes` skips the question for one run.
+heap_confirm: true
+
+# true  - GC.heap_dump: live objects only (a full GC runs first; smaller file)
+# false - GC.heap_dump -all: unreachable objects too (bigger file, no forced full GC)
+heap_live_only: true
+
+# After a heap dump is copied, read it locally and write a class histogram next to it
+# (heap_<pod>_<time>.summary.txt): the top classes by size and by instance count and the
+# largest arrays. Counts are exact; sizes are field/array data (object headers are not in
+# a dump). Nothing is sent anywhere. Analyze an existing file with `kube-dump -analyze file.hprof`.
+heap_summary: true
+# Rows per section of the summary (at least 1).
+heap_top: 30
+
+# Time limits, so a hung API server or a stuck exec stream cannot block the tool forever.
+# kubectl_timeout    - one kubectl call: get, exec, the jattach upload, a thread dump
+# heap_timeout       - how long the JVM may take to write the heap dump
+# copy_idle_timeout  - no data from the pod for this long while copying the heap dump out:
+#                      the copy is restarted from where it stopped (up to 5 attempts)
+# Durations like 60s, 5m, 1h; at least 1s.
+kubectl_timeout: 60s
+heap_timeout: 15m
+copy_idle_timeout: 60s
+
+# Directory where dump files are written:
+#   <output>/<env>/<service>/thread_<pod>_<YYYYMMDD>_<HHMMSS>.dump
+#   <output>/<env>/<service>/heap_<pod>_<YYYYMMDD>_<HHMMSS>.hprof
+output: dumps

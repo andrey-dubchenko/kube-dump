@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=kube-dump
+GenericName=JVM dumps from Kubernetes
+Comment=Thread and heap dumps of the JVM pods of a Kubernetes service
+Exec=kube-dump
+Icon=kube-dump
+Terminal=true
+Categories=Development;System;
+Keywords=kubernetes;jvm;thread dump;heap dump;

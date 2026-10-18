@@ -1,0 +1,9 @@
+# Files that must keep LF line endings even when checked out on Windows.
+*.go text eol=lf
+*.sh text eol=lf
+*.desktop text eol=lf
+Makefile text eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.ico binary
+*.syso binary

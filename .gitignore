@@ -1,0 +1,30 @@
+# Build output
+/dist/
+/*.exe
+/kube-dump
+*.test
+*.out
+coverage.*
+
+# Local configuration and the helper binary (not for the repository)
+/configuration.yml
+/jattach
+
+# Collected dumps: they contain secrets and personal data, never commit them
+/dumps/
+*.hprof
+*.dump
+*.summary.txt
+
+# Editors and tools
+/.idea/
+/.vscode/
+/.codegraph/
+/.claude/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Scratch files
+/tmp_*
+/edit_tmp.*
